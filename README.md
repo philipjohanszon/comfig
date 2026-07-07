@@ -1,0 +1,3 @@
+# Comfig
+
+Making configurations comfortable
