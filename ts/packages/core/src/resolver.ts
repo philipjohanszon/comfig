@@ -10,7 +10,7 @@ export const EnvResolver = (prefixOverride?: string): Resolver => ({
     resolve: (value): string => {
         const variable = process.env[value]
 
-        if (!variable) {
+        if (variable === undefined) {
             throw Error(`Could not get environment variable ${value}`)
         }
 
