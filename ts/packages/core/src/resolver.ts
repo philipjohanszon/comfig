@@ -1,3 +1,5 @@
+import {readFile} from "node:fs/promises";
+
 export type ResolverFactory<T> = (raw: T) => Promise<Resolver> | Resolver
 
 export interface Resolver {
@@ -15,5 +17,16 @@ export const EnvResolver = (prefixOverride?: string): Resolver => ({
         }
 
         return variable
+    }
+} satisfies Resolver)
+
+export const FileResolver = (prefixOverride?: string): Resolver => ({
+    prefix: prefixOverride || "file",
+    resolve: async (value): Promise<string> => {
+        try {
+            return await readFile(value, "utf8")
+        } catch (cause) {
+            throw new Error(`Could not read file ${value}`, { cause })
+        }
     }
 } satisfies Resolver)
