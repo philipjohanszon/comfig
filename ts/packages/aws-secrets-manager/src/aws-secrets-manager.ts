@@ -1,6 +1,8 @@
 import {SecretsManagerClient, GetSecretValueCommand} from "@aws-sdk/client-secrets-manager"
 import type {Resolver} from "@comfig/core"
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export interface AWSSecretsResolverOptions {
     region?: string
     client?: SecretsManagerClient
@@ -12,15 +14,16 @@ export const AWSSecretsResolver = (options: AWSSecretsResolverOptions = {}, pref
     return {
         prefix: prefixOverride ?? "aws",
         resolve: async (value): Promise<string> => {
-            const [secret, version] = value.split("@")
+            const [secretId, version] = value.split("@")
 
-            if (!version) {
-                throw Error(`Secret "${value}" must use the <name>@<version> format, e.g. "db@latest" or "db@3"`)
-            }
+            const isPinned = version !== undefined && version !== "" && version !== "latest"
+
+            const isUUID = isPinned ? UUID.test(version) : false
 
             const response = await client.send(new GetSecretValueCommand({
-                SecretId: secret,
-                ...(version == "latest" ? {} : {VersionStage: version})
+                SecretId: secretId,
+                ...(isPinned && isUUID ? {VersionId: version} : {}),
+                ...(isPinned && !isUUID ? {VersionStage: version} : {})
             }))
 
             if (response.SecretString !== undefined) {
@@ -31,7 +34,7 @@ export const AWSSecretsResolver = (options: AWSSecretsResolverOptions = {}, pref
                 return Buffer.from(response.SecretBinary).toString("utf8")
             }
 
-            throw Error(`Secret ${secret}@${version} has no value`)
+            throw Error(`Secret ${value} has no value`)
         }
     } satisfies Resolver
 }
