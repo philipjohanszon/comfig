@@ -33,9 +33,5 @@ export const GCPSecretResolver = (options: GCPSecretResolverOptions, prefixOverr
 const resolveName = (value: string, projectId: string): string => {
     const [secret, version] = value.split("@")
 
-    if (!version) {
-        throw Error(`Secret "${value}" must use the <name>@<version> format, e.g. "db@latest" or "db@3"`)
-    }
-
-    return `projects/${projectId}/secrets/${secret}/versions/${version}`
+    return `projects/${projectId}/secrets/${secret}/versions/${version || "latest"}`
 }
