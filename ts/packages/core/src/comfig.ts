@@ -1,8 +1,8 @@
-import {ResolverFactory, Resolver} from "./resolver";
-import {JSONParser, Parser} from "./parser";
+import type {ResolverFactory, Resolver} from "./resolver.js";
+import {JSONParser, type Parser} from "./parser.js";
 import {z} from "zod";
-import {FileSystemSource, Source} from "./source";
-import {environment} from "./environment";
+import {FileSystemSource, type Source} from "./source.js";
+import {environment} from "./environment.js";
 
 export class Comfig<T extends z.ZodObject> {
     private source?: Source

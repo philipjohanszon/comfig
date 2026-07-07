@@ -1,15 +1,9 @@
-import { Comfig } from "./comfig";
-import { environment } from "./environment";
-import { Parser, JSONParser } from "./parser";
-import { ResolverFactory, Resolver, EnvResolver } from "./resolver";
-import { Source, FileSystemSource } from "./source";
-import { expandable } from "./schema";
-
-export {
-    Comfig,
-    environment,
-    Parser, JSONParser,
-    ResolverFactory, Resolver, EnvResolver,
-    Source, FileSystemSource,
-    expandable
-}
+export { Comfig } from "./comfig.js";
+export { environment } from "./environment.js";
+export { JSONParser } from "./parser.js";
+export type { Parser } from "./parser.js";
+export { EnvResolver } from "./resolver.js";
+export type { Resolver, ResolverFactory } from "./resolver.js";
+export { FileSystemSource } from "./source.js";
+export type { Source } from "./source.js";
+export { expandable } from "./schema.js";
