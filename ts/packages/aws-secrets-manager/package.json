@@ -1,0 +1,29 @@
+{
+  "name": "@comfig/aws-secrets-manager",
+  "version": "0.1.0",
+  "description": "AWS Secrets Manager resolver for comfig",
+  "keywords": ["config", "configuration", "secrets", "aws", "secrets-manager", "comfig"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philipjohanszon/comfig.git",
+    "directory": "ts/packages/aws-secrets-manager"
+  },
+  "homepage": "https://github.com/philipjohanszon/comfig#readme",
+  "bugs": "https://github.com/philipjohanszon/comfig/issues",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist"],
+  "sideEffects": false,
+  "publishConfig": { "access": "public" },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": { "@aws-sdk/client-secrets-manager": "^3.1081.0" },
+  "peerDependencies": { "@comfig/core": "^0.1.0" },
+  "devDependencies": { "@comfig/core": "workspace:^", "typescript": "^5.9.0" }
+}
