@@ -1,13 +1,28 @@
 {
   "name": "@comfig/core",
   "version": "0.1.0",
+  "description": "Comfortable configuration loading",
+  "keywords": ["config", "configuration", "secrets", "env", "zod", "dotenv"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philipjohanszon/comfig.git",
+    "directory": "ts/packages/core"
+  },
+  "homepage": "https://github.com/philipjohanszon/comfig#readme",
+  "bugs": "https://github.com/philipjohanszon/comfig/issues",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
   "files": ["dist"],
+  "sideEffects": false,
+  "publishConfig": { "access": "public" },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc",
+    "prepack": "tsc",
     "test": "vitest"
   },
-  "peerDependencies": { "zod": "^4.4.x" },
-  "devDependencies": { "zod": "^4.4.x", "typescript": "^5.x" }
+  "peerDependencies": { "zod": "^4.4.0" },
+  "devDependencies": { "zod": "^4.4.0", "typescript": "^5.9.0" }
 }
