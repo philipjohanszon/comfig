@@ -20,6 +20,16 @@ func resolve(ctx context.Context, config any, resolvers map[string]Resolver) err
 
 	var walk func(v reflect.Value) error
 	walk = func(v reflect.Value) error {
+		if v.Kind() == reflect.Struct && v.CanSet() {
+			wasExpanded, err := expandValue(ctx, v, resolvers)
+			if err != nil {
+				return err
+			}
+			if wasExpanded {
+				return nil
+			}
+		}
+
 		switch v.Kind() {
 		case reflect.Pointer:
 			if v.IsNil() {
