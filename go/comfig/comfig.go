@@ -37,6 +37,7 @@ func New[T any](opts ...Option[T]) *Comfig[T] {
 			return nil
 		},
 		resolversFactories: []ResolversFactory[T]{},
+		source:             NewFileSystemSourceByDirectory("config/"),
 	}
 
 	for _, opt := range opts {

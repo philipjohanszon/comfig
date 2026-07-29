@@ -5,7 +5,7 @@ import {FileSystemSource, type Source} from "./source.js";
 import {environment} from "./environment.js";
 
 export class Comfig<T extends z.ZodObject> {
-    private source?: Source
+    private source: Source = FileSystemSource("config/")
     private parser: Parser = JSONParser
     private resolverFactories: ResolverFactory<z.input<T>>[] = []
 
