@@ -26,22 +26,22 @@ func WithPrefixOverride(prefix string) ResolverOption {
 }
 
 func NewEnvResolver(opts ...ResolverOption) Resolver {
-	resolverSettings := resolverSettings{
+	settings := resolverSettings{
 		prefix: "env",
 	}
 
 	for _, opt := range opts {
-		opt(&resolverSettings)
+		opt(&settings)
 	}
 
-	return envResolver{resolverSettings: resolverSettings}
+	return envResolver{settings: settings}
 }
 
 type envResolver struct {
-	resolverSettings
+	settings resolverSettings
 }
 
-func (e envResolver) Prefix() string { return e.prefix }
+func (e envResolver) Prefix() string { return e.settings.prefix }
 func (e envResolver) Resolve(_ context.Context, value string) (string, error) {
 	data, ok := os.LookupEnv(value)
 	if !ok {
@@ -51,22 +51,22 @@ func (e envResolver) Resolve(_ context.Context, value string) (string, error) {
 }
 
 func NewFileResolver(opts ...ResolverOption) Resolver {
-	resolverSettings := resolverSettings{
+	settings := resolverSettings{
 		prefix: "file",
 	}
 
 	for _, opt := range opts {
-		opt(&resolverSettings)
+		opt(&settings)
 	}
 
-	return fileResolver{resolverSettings: resolverSettings}
+	return fileResolver{settings: settings}
 }
 
 type fileResolver struct {
-	resolverSettings
+	settings resolverSettings
 }
 
-func (f fileResolver) Prefix() string { return f.prefix }
+func (f fileResolver) Prefix() string { return f.settings.prefix }
 func (f fileResolver) Resolve(_ context.Context, value string) (string, error) {
 	data, err := os.ReadFile(value)
 	if err != nil {
