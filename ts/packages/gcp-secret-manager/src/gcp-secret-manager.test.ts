@@ -47,6 +47,22 @@ test('gcp resolver @version fetches that version', async () => {
     expect(accessSecretVersion).toHaveBeenCalledWith({name: "projects/my-proj/secrets/db/versions/3"})
 })
 
+test('gcp resolver rejects an empty version selector', async () => {
+    const accessSecretVersion = vi.fn().mockResolvedValue(payload("secret"))
+    const resolver = GCPSecretResolver({projectId: "my-proj", client: clientWith(accessSecretVersion)})
+
+    await expect(resolver.resolve("db@")).rejects.toThrow()
+    expect(accessSecretVersion).not.toHaveBeenCalled()
+})
+
+test('gcp resolver rejects multiple version selectors', async () => {
+    const accessSecretVersion = vi.fn().mockResolvedValue(payload("secret"))
+    const resolver = GCPSecretResolver({projectId: "my-proj", client: clientWith(accessSecretVersion)})
+
+    await expect(resolver.resolve("db@3@typo")).rejects.toThrow()
+    expect(accessSecretVersion).not.toHaveBeenCalled()
+})
+
 test('gcp resolver builds resource name from projectId and short name', async () => {
     const accessSecretVersion = vi.fn().mockResolvedValue(payload("v"))
 

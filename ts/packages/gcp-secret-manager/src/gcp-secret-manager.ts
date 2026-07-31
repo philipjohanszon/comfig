@@ -31,7 +31,15 @@ export const GCPSecretResolver = (options: GCPSecretResolverOptions, prefixOverr
 }
 
 const resolveName = (value: string, projectId: string): string => {
-    const [secret, version] = value.split("@")
+    const [secret, version, ...extraSelectors] = value.split("@")
+
+    if (extraSelectors.length > 0) {
+        throw new Error("GCP secret reference has multiple version selectors")
+    }
+
+    if (version === "") {
+        throw new Error("GCP secret reference has an empty version selector")
+    }
 
     return `projects/${projectId}/secrets/${secret}/versions/${version || "latest"}`
 }
