@@ -8,6 +8,16 @@
       "release-type": "go",
       "component": "go/comfig",
       "initial-version": "0.1.0"
+    },
+    "go/comfig-aws": {
+      "release-type": "go",
+      "component": "go/comfig-aws",
+      "initial-version": "0.1.0"
+    },
+    "go/comfig-gcp": {
+      "release-type": "go",
+      "component": "go/comfig-gcp",
+      "initial-version": "0.1.0"
     }
   }
 }
