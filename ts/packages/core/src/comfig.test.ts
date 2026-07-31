@@ -3,6 +3,9 @@ import {Comfig} from "./comfig";
 import {z} from "zod";
 import {EnvResolver} from "./resolver";
 import {expandable} from "./schema";
+import {mkdtemp, rm, writeFile} from "node:fs/promises";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
 
 const getFunctionalComfig = <T extends z.ZodObject>(input: unknown, schema: T) => {
     return new Comfig(schema)
@@ -13,13 +16,7 @@ const getFunctionalComfig = <T extends z.ZodObject>(input: unknown, schema: T) =
 
 afterEach(() => { vi.unstubAllEnvs() })
 
-test('loading configuration should throw if no path or source is setup', () => {
-    const comfig = new Comfig(z.object({ test: z.string() }))
-
-    expect(() => comfig.load()).rejects.toThrow()
-})
-
-test('loading configuration should throw if reading source fails', () => {
+test('loading configuration throws when reading the source fails', async () => {
     const comfig = getFunctionalComfig({}, z.object({ test: z.string() }))
 
     comfig.useSource({
@@ -28,10 +25,10 @@ test('loading configuration should throw if reading source fails', () => {
         }
     })
 
-    expect(() => comfig.load()).rejects.toThrow()
+    await expect(comfig.load()).rejects.toThrow()
 })
 
-test('loading configuration should throw if parsing source fails', () => {
+test('loading configuration throws when parsing the source fails', async () => {
     const comfig = getFunctionalComfig({ test: "this is valid" }, z.object({ test: z.string() }))
 
     comfig.useParser({
@@ -41,26 +38,26 @@ test('loading configuration should throw if parsing source fails', () => {
         }
     })
 
-    expect(() => comfig.load()).rejects.toThrow()
+    await expect(comfig.load()).rejects.toThrow()
 })
 
-test('loading configuration should throw if resolver fails', () => {
+test('loading configuration throws when creating a resolver fails', async () => {
     const comfig = getFunctionalComfig({ test: "this is valid" }, z.object({ test: z.string() }))
 
     comfig.useResolver((config) => {
         throw Error("resolver fails")
     })
 
-    expect(() => comfig.load()).rejects.toThrow()
+    await expect(comfig.load()).rejects.toThrow("resolver fails")
 })
 
-test('loading configuration should throw if duplicate resolver prefixes are encountered', () => {
+test('loading configuration throws when duplicate resolver prefixes are found', async () => {
     const comfig = getFunctionalComfig({ test: "this is valid" }, z.object({ test: z.string() }))
 
     comfig.useResolver((config) => EnvResolver())
     comfig.useResolver((config) => EnvResolver())
 
-    expect(() => comfig.load()).rejects.toThrow()
+    await expect(comfig.load()).rejects.toThrow()
 })
 
 test('should use correct prefix for resolver', async () => {
@@ -99,6 +96,66 @@ test('prefix has to match exactly to the start of the string', async () => {
     comfig.useResolver((config) => EnvResolver())
 
     expect((await comfig.load()).test).eq("eenv://test") //does not get env variable since eenv != env
+})
+
+test('loading configuration reports the nested path when resolving a value fails', async () => {
+    const comfig = getFunctionalComfig(
+        { database: { password: "secret://primary" } },
+        z.object({ database: z.object({ password: z.string() }) }),
+    )
+    comfig.useResolver(() => ({
+        prefix: "secret",
+        resolve: () => { throw Error("access denied") },
+    }))
+
+    await expect(comfig.load()).rejects.toThrow(
+        'failed to resolve "secret://primary" at $.database.password',
+    )
+})
+
+test('loading configuration resolves values inside arrays', async () => {
+    const comfig = getFunctionalComfig(
+        { secrets: ["secret://first", "secret://second"] },
+        z.object({ secrets: z.array(z.string()) }),
+    )
+    comfig.useResolver(async () => ({
+        prefix: "secret",
+        resolve: async (value) => `resolved-${value}`,
+    }))
+
+    await expect(comfig.load()).resolves.toEqual({
+        secrets: ["resolved-first", "resolved-second"],
+    })
+})
+
+test('loading configuration validates the resolved configuration', async () => {
+    const comfig = getFunctionalComfig(
+        { port: "not-a-number" },
+        z.object({ port: z.number() }),
+    )
+
+    await expect(comfig.load()).rejects.toBeInstanceOf(z.ZodError)
+})
+
+test('usePath loads the correct file using the parser extension', async () => {
+    const directory = await mkdtemp(join(tmpdir(), "comfig-"))
+    vi.stubEnv("env", "integration")
+    vi.resetModules()
+    const {Comfig: EnvironmentComfig} = await import("./comfig")
+    await writeFile(join(directory, "integration.conf"), "enabled")
+
+    try {
+        const comfig = new EnvironmentComfig(z.object({ enabled: z.boolean() }))
+            .usePath(directory)
+            .useParser({
+                extension: "conf",
+                parse: (raw) => ({ enabled: raw === "enabled" }),
+            })
+
+        await expect(comfig.load()).resolves.toEqual({ enabled: true })
+    } finally {
+        await rm(directory, { recursive: true, force: true })
+    }
 })
 
 test('loading configuration happy path should work', async () => {

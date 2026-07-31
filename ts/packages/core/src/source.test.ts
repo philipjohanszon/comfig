@@ -28,16 +28,16 @@ test('filesystem source reads from config file', async () => {
     expect(await FileSystemSource(dir).getConfiguration(env, extension)).toBe(fileContents)
 })
 
-test('filesystem source fails if file does not exist', async () => {
+test('filesystem source fails if the requested file does not exist', async () => {
     const env = "test"
     const extension = "json"
 
-    expect(() => FileSystemSource(dir).getConfiguration(env, extension)).rejects.toThrow()
+    await expect(FileSystemSource(dir).getConfiguration(env, extension)).rejects.toThrow()
 })
 
-test('filesystem source fails if directory does not exist', async () => {
+test('filesystem source fails if the requested directory does not exist', async () => {
     const env = "test"
     const extension = "json"
 
-    expect(() => FileSystemSource(`${dir}/unknown`).getConfiguration(env, extension)).rejects.toThrow()
+    await expect(FileSystemSource(`${dir}/unknown`).getConfiguration(env, extension)).rejects.toThrow()
 })
