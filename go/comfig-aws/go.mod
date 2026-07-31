@@ -2,13 +2,11 @@ module github.com/philipjohanszon/comfig/go/comfig-aws
 
 go 1.26
 
-replace github.com/philipjohanszon/comfig/go/comfig => ../comfig
-
 require (
 	github.com/aws/aws-sdk-go-v2 v1.43.2
 	github.com/aws/aws-sdk-go-v2/config v1.32.33
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.44.2
-	github.com/philipjohanszon/comfig/go/comfig v0.0.0
+	github.com/philipjohanszon/comfig/go/comfig v0.1.0
 )
 
 require (

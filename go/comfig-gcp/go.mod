@@ -2,12 +2,10 @@ module github.com/philipjohanszon/comfig/go/comfig-gcp
 
 go 1.26
 
-replace github.com/philipjohanszon/comfig/go/comfig => ../comfig
-
 require (
 	cloud.google.com/go/secretmanager v1.21.0
 	github.com/googleapis/gax-go/v2 v2.23.0
-	github.com/philipjohanszon/comfig/go/comfig v0.0.0
+	github.com/philipjohanszon/comfig/go/comfig v0.1.0
 )
 
 require (
