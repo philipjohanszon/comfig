@@ -1,0 +1,29 @@
+name: Test - Go
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: go test (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [comfig, comfig-aws, comfig-gcp]
+    defaults:
+      run:
+        working-directory: go/${{ matrix.module }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go/comfig/go.mod
+          cache-dependency-path: go/*/go.sum
+      - run: go test ./...
