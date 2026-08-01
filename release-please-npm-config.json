@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "include-component-in-tag": true,
+  "tag-separator": "/",
+  "packages": {
+    "ts/packages/core": {
+      "release-type": "node",
+      "component": "ts/packages/core",
+      "initial-version": "0.1.0"
+    },
+    "ts/packages/aws-secrets-manager": {
+      "release-type": "node",
+      "component": "ts/packages/aws-secrets-manager",
+      "initial-version": "0.1.0"
+    },
+    "ts/packages/gcp-secret-manager": {
+      "release-type": "node",
+      "component": "ts/packages/gcp-secret-manager",
+      "initial-version": "0.1.0"
+    }
+  },
+  "plugins": [
+    {
+      "type": "node-workspace",
+      "updatePeerDependencies": true
+    }
+  ]
+}
