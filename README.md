@@ -11,6 +11,8 @@ validates with Zod; Go supports validation through `WithValidator`.
 - **Typed results** — inferred from a Zod schema in TypeScript, from type parameters in Go.
 - **Environment-aware** — reads `config/<environment>.json`, where the environment comes from the
   `env` or `ENV` environment variable, falling back to `local`.
+- **Committable** — configuration files live in the repo, so onboarding doesn't require hand-copying
+  `.env` files, and secrets are never exposed in environment variables or the container environment.
 - **References** — `env://` and `file://` resolvers included, `aws://` and `gcp://` via adapters.
 - **Pluggable** — swap the source, the parser, or add custom resolvers.
 - **Expandable fields** — inline values in development, secret references in production, with no
