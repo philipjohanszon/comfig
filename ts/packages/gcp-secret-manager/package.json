@@ -2,7 +2,15 @@
   "name": "@comfig/gcp-secret-manager",
   "version": "0.1.0",
   "description": "GCP Secret Manager resolver for comfig",
-  "keywords": ["config", "configuration", "secrets", "gcp", "google-cloud", "secret-manager", "comfig"],
+  "keywords": [
+    "config",
+    "configuration",
+    "secrets",
+    "gcp",
+    "google-cloud",
+    "secret-manager",
+    "comfig"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -14,16 +22,32 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "prepack": "tsc",
     "test": "vitest"
   },
-  "dependencies": { "@google-cloud/secret-manager": "^6.2.0" },
-  "peerDependencies": { "@comfig/core": "^0.1.0" },
-  "devDependencies": { "@comfig/core": "workspace:^", "typescript": "^5.9.0" }
+  "dependencies": {
+    "@google-cloud/secret-manager": "^6.2.0"
+  },
+  "peerDependencies": {
+    "@comfig/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@comfig/core": "workspace:^",
+    "typescript": "^5.9.0"
+  }
 }
