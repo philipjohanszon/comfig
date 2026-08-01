@@ -89,7 +89,8 @@ Both read the same `config/<environment>.json`:
 
 `env://LOCAL_TOKEN` is resolved from the `LOCAL_TOKEN` environment variable by the `EnvResolver`.
 
-The environment name is local by default but it can be set with 'env' or 'ENV' environment variables. Setting it to 'prod' would cause `config/prod.json` to be loaded.
+The environment defaults to `local`, but can be set with the `env` environment variable, falling
+back to `ENV`. Setting it to `prod`, for example, loads `config/prod.json`.
 
 For the full API, expandable values, and custom sources and resolvers, see the
 [TypeScript guide](ts/packages/core/README.md) and the [Go guide](go/comfig/README.md).
