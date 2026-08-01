@@ -20,6 +20,20 @@ validates with Zod; Go supports validation through `WithValidator`.
 - **Lightweight** — the Go core has no third-party dependencies; the TypeScript core only depends
   on Zod.
 
+## Install
+
+TypeScript:
+
+```bash
+npm install @comfig/core zod
+```
+
+Go (Go 1.26+):
+
+```bash
+go get github.com/philipjohanszon/comfig/go/comfig
+```
+
 ## Quick start
 
 TypeScript:
@@ -30,14 +44,30 @@ import { z } from "zod"
 
 const config = await new Comfig(z.object({
   token: z.string(),
+  port: z.number(),
+  debug: z.boolean(),
 }))
   .useResolver(() => EnvResolver())
   .load()
 ```
 
-Go, where `Config` is a struct with `json` field tags:
+Go:
 
 ```go
+package main
+
+import (
+	"context"
+
+	"github.com/philipjohanszon/comfig/go/comfig"
+)
+
+type Config struct {
+	Token string `json:"token"`
+	Port  int    `json:"port"`
+	Debug bool   `json:"debug"`
+}
+
 func loadConfig(ctx context.Context) (Config, error) {
 	return comfig.New[Config](
 		comfig.WithResolvers(func(context.Context, Config) ([]comfig.Resolver, error) {
@@ -47,10 +77,19 @@ func loadConfig(ctx context.Context) (Config, error) {
 }
 ```
 
-Install `@comfig/core` with `npm install @comfig/core zod`, or
-`github.com/philipjohanszon/comfig/go/comfig` (Go 1.26+). Both read `config/<environment>.json`,
-where the environment is the value of the `env` environment variable, falling back to `ENV`, then
-`local`.
+Both read the same `config/<environment>.json`:
+
+```json
+{
+  "token": "env://LOCAL_TOKEN",
+  "port": 3000,
+  "debug": true
+}
+```
+
+`env://LOCAL_TOKEN` is resolved from the `LOCAL_TOKEN` environment variable by the `EnvResolver`.
+
+The environment name is local by default but it can be set with 'env' or 'ENV' environment variables. Setting it to 'prod' would cause `config/prod.json` to be loaded.
 
 For the full API, expandable values, and custom sources and resolvers, see the
 [TypeScript guide](ts/packages/core/README.md) and the [Go guide](go/comfig/README.md).
