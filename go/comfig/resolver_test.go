@@ -29,6 +29,14 @@ func TestEnvResolver(t *testing.T) {
 			t.Fatal("expected error for missing environment variable")
 		}
 	})
+
+	t.Run("uses overridden prefix", func(t *testing.T) {
+		resolver := NewEnvResolver(WithPrefixOverride("secret"))
+
+		if got := resolver.Prefix(); got != "secret" {
+			t.Fatalf("got prefix %q, want %q", got, "secret")
+		}
+	})
 }
 
 func TestFileResolver(t *testing.T) {
@@ -57,6 +65,14 @@ func TestFileResolver(t *testing.T) {
 		}
 		if got != "" {
 			t.Fatalf("expected \"\" got = %q", got)
+		}
+	})
+
+	t.Run("uses overridden prefix", func(t *testing.T) {
+		resolver := NewFileResolver(WithPrefixOverride("secret-file"))
+
+		if got := resolver.Prefix(); got != "secret-file" {
+			t.Fatalf("got prefix %q, want %q", got, "secret-file")
 		}
 	})
 }

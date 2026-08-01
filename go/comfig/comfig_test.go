@@ -3,17 +3,128 @@ package comfig
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
+	"testing/fstest"
 )
 
 type memorySource struct {
 	data string
+	err  error
 }
 
 func (m memorySource) Configuration(_ context.Context, _, _ string) ([]byte, error) {
-	return []byte(m.data), nil
+	return []byte(m.data), m.err
+}
+
+func TestLoad(t *testing.T) {
+	type config struct {
+		Name string `json:"name"`
+	}
+
+	t.Run("errors when source cannot read configuration", func(t *testing.T) {
+		sourceErr := errors.New("source unavailable")
+		loader := New[config](WithSource[config](memorySource{err: sourceErr}))
+
+		_, err := loader.Load(context.Background())
+
+		if !errors.Is(err, sourceErr) {
+			t.Fatalf("expected source error to be wrapped, got %v", err)
+		}
+		if !strings.Contains(err.Error(), "read configuration") {
+			t.Fatalf("expected read configuration context, got %v", err)
+		}
+	})
+
+	t.Run("errors when configuration cannot be parsed", func(t *testing.T) {
+		loader := New[config](WithSource[config](memorySource{data: `{"name":`}))
+
+		_, err := loader.Load(context.Background())
+
+		if err == nil {
+			t.Fatal("expected error for invalid configuration")
+		}
+		if !strings.Contains(err.Error(), "parse configuration") {
+			t.Fatalf("expected parse configuration context, got %v", err)
+		}
+	})
+
+	t.Run("errors when resolver factory fails", func(t *testing.T) {
+		factoryErr := errors.New("credentials unavailable")
+		loader := New[config](
+			WithSource[config](memorySource{data: `{}`}),
+			WithResolvers(func(context.Context, config) ([]Resolver, error) {
+				return nil, factoryErr
+			}),
+		)
+
+		_, err := loader.Load(context.Background())
+
+		if !errors.Is(err, factoryErr) {
+			t.Fatalf("expected factory error to be wrapped, got %v", err)
+		}
+		if !strings.Contains(err.Error(), "build resolvers") {
+			t.Fatalf("expected build resolvers context, got %v", err)
+		}
+	})
+
+	t.Run("errors when resolver prefixes are duplicated", func(t *testing.T) {
+		loader := New[config](
+			WithSource[config](memorySource{data: `{}`}),
+			WithResolvers(func(context.Context, config) ([]Resolver, error) {
+				return []Resolver{
+					fakeResolver{prefix: "secret"},
+					fakeResolver{prefix: "secret"},
+				}, nil
+			}),
+		)
+
+		_, err := loader.Load(context.Background())
+
+		if err == nil {
+			t.Fatal("expected error for duplicate resolver prefixes")
+		}
+		if !strings.Contains(err.Error(), "duplicate resolver prefixes") {
+			t.Fatalf("expected duplicate-prefix context, got %v", err)
+		}
+	})
+
+	t.Run("errors when validation fails", func(t *testing.T) {
+		validationErr := errors.New("name is not allowed")
+		loader := New[config](
+			WithSource[config](memorySource{data: `{"name":"invalid"}`}),
+			WithValidator(func(config) error {
+				return validationErr
+			}),
+		)
+
+		_, err := loader.Load(context.Background())
+
+		if !errors.Is(err, validationErr) {
+			t.Fatalf("expected validation error to be wrapped, got %v", err)
+		}
+		if !strings.Contains(err.Error(), "validate configuration") {
+			t.Fatalf("expected validation context, got %v", err)
+		}
+	})
+
+	t.Run("loads the environment configuration that is selected", func(t *testing.T) {
+		t.Setenv("env", "dev")
+
+		loader := New[config](WithFS[config](fstest.MapFS{
+			"dev.json": &fstest.MapFile{Data: []byte(`{"name":"from-fs"}`)},
+		}))
+
+		loaded, err := loader.Load(context.Background())
+		if err != nil {
+			t.Fatalf("failed to load configuration: %v", err)
+		}
+		if loaded.Name != "from-fs" {
+			t.Fatalf("got name %q, want %q", loaded.Name, "from-fs")
+		}
+	})
 }
 
 func TestLoadExpandable(t *testing.T) {
